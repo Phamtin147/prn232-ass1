@@ -32,6 +32,8 @@ prn232-ass1/
 
 ## 📊 Database Schema & ERD Diagram
 
+![TaskTrack ERD Diagram](docs/erd.png)
+
 ```mermaid
 erDiagram
     Department ||--o{ Project : "has"

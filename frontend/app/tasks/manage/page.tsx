@@ -27,6 +27,7 @@ export default function TaskManagePage() {
   const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
   // Modal form states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -162,11 +163,14 @@ export default function TaskManagePage() {
     }
   };
 
-  const filteredTasks = tasks.filter((t) =>
-    t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (t.description && t.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (t.projectName && t.projectName.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredTasks = tasks.filter((t) => {
+    const matchesSearch =
+      t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (t.description && t.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (t.projectName && t.projectName.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesStatus = statusFilter === 'all' || t.status === Number(statusFilter);
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <div className="space-y-6">
@@ -195,16 +199,42 @@ export default function TaskManagePage() {
         </button>
       </div>
 
-      {/* Search Bar */}
-      <div className="relative max-w-md">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Filter by title, project, description..."
-          className="w-full px-4 py-2 pl-10 rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
-        />
-        <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+      {/* Search Bar & Status Filter */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="relative max-w-md w-full">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Filter by title, project, description..."
+            className="w-full px-4 py-2 pl-10 rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+          />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+        </div>
+
+        {/* Status Filter buttons */}
+        <div className="flex items-center p-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-xs font-medium text-slate-600 dark:text-zinc-300 shrink-0">
+          <span className="px-2.5 py-1 text-slate-400 font-normal">Status:</span>
+          {[
+            { id: 'all', label: 'All' },
+            { id: '0', label: 'To Do' },
+            { id: '1', label: 'In Progress' },
+            { id: '2', label: 'Done' },
+            { id: '3', label: 'Cancelled' },
+          ].map((st) => (
+            <button
+              key={st.id}
+              onClick={() => setStatusFilter(st.id)}
+              className={`px-3 py-1 rounded-lg transition-colors ${
+                statusFilter === st.id
+                  ? 'bg-indigo-600 text-white font-semibold shadow-xs'
+                  : 'hover:text-indigo-600 dark:hover:text-indigo-400'
+              }`}
+            >
+              {st.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Table Card */}
